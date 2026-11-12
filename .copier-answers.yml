@@ -1,0 +1,7 @@
+# Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
+_commit: v1.0.4
+_src_path: https://github.com/GrimsVerk/grimsverk-template.git
+description: 'Farm YouTube channels for ideas: fetch and cache transcripts, filter
+    by topic, hand them to agents to read'
+language: python
+project_name: yt-harvest

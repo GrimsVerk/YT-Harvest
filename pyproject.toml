@@ -1,0 +1,36 @@
+[project]
+name = "yt-harvest"
+version = "0.1.0"
+description = "Farm YouTube channels for ideas: fetch and cache transcripts, filter by topic, hand them to agents to read"
+readme = "README.md"
+requires-python = ">=3.12"
+license = "MIT"
+dependencies = []
+
+[dependency-groups]
+# Keep ruff in step with the rev in .pre-commit-config.yaml.
+dev = [
+    "mypy~=2.3",
+    "pre-commit~=4.0",
+    "pytest>=8.3",
+    "ruff~=0.15.22",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/yt_harvest"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.mypy]
+strict = true
+mypy_path = "src"
+files = ["src", "tests"]
