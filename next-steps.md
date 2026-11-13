@@ -13,7 +13,8 @@ Branch `harvest-1`, draft PR #1 (brief: `chief-of-staff/briefs/yt-harvest-1.md`)
   workaround. To resume (owner decides when, ideally after a day): delete the stop file, then
   `scripts/harvest-bg.sh --no-index` (pacing is now 15 s per video, ~2 days for everything; the
   10 most-viewed + 10 most-recent per channel come first, ~1 h).
-- Doing: ideas from the 9 transcripts we have into `docs/ideas/grimstrade-ideas.md`.
+- Done: first-pass ideas from the 8 transcripts we have (8 channels) in
+  `docs/ideas/grimstrade-ideas.md` (12 rules; one, the sentiment gap, is backed by two channels).
 - Next, once picks are cached: read each channel's 10 most-viewed + 10 most-recent
   (`uv run yt-harvest picks`) and extend the ideas file. A reader brief for subagents is in
   `docs/ideas/reader-brief.md`; per-channel notes go to `<data_root>/notes/<slug>.md`.
