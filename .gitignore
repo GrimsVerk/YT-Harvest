@@ -6,3 +6,9 @@ __pycache__/
 .mypy_cache/
 .ruff_cache/
 dist/
+
+# Machine-specific settings (copy local.toml.example)
+local.toml
+# Never commit harvested data
+data/
+*.jsonl
