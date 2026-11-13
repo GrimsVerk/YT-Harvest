@@ -5,7 +5,12 @@ description = "Farm YouTube channels for ideas: fetch and cache transcripts, fil
 readme = "README.md"
 requires-python = ">=3.12"
 license = "MIT"
-dependencies = []
+dependencies = [
+    "yt-dlp>=2026.7.4",
+]
+
+[project.scripts]
+yt-harvest = "yt_harvest.cli:main"
 
 [dependency-groups]
 # Keep ruff in step with the rev in .pre-commit-config.yaml.

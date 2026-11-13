@@ -1,0 +1,39 @@
+# Committed levers and the channel list. Machine-specific values (data_root)
+# go in local.toml (copy local.toml.example). Missing keys take in-code defaults.
+
+# At or below this many seconds a video is a Short and is not fetched.
+shorts_max_seconds = 180
+
+# Seconds between per-video requests. Polite pacing; do not lower casually.
+fetch_delay_seconds = 6.0
+
+# Halt triggers. Videos that are unavailable or have no captions never extend
+# the error streak; a bot check halts at once and leaves STOPPED-bot-check.txt.
+consecutive_fetch_error_limit = 3
+fetch_error_rate_limit = 0.03
+missing_caption_rate_limit = 1.0
+
+# Fetch priority and `picks`: per channel, this many most-viewed and most-recent.
+pick_top = 10
+pick_recent = 10
+
+# Topic selection (`yt-harvest select`): keyword in title or description, or at
+# least `mention_threshold` distinct keywords in the transcript.
+mention_threshold = 3
+topic_keywords = [
+  "moving average", "rsi", "macd", "momentum", "mean reversion", "breakout",
+  "support", "resistance", "trend", "volume", "volatility", "vix",
+  "yield curve", "interest rates", "fed", "inflation", "cpi", "liquidity",
+  "dollar", "dxy", "bitcoin", "halving", "altcoin", "dividend", "etf",
+  "earnings", "recession", "stop loss", "position size", "backtest",
+  "risk management", "options", "short selling", "sector rotation",
+]
+
+# Example channels (placeholders): replace with your own list.
+[[channels]]
+name = "Example Channel One"
+url = "https://www.youtube.com/@example-channel-one"
+
+[[channels]]
+name = "Example Channel Two"
+url = "https://www.youtube.com/@example-channel-two"
