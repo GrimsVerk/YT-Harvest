@@ -22,7 +22,8 @@ setsid -f bash -c '
     echo "=== harvest start $(date -u +%FT%TZ) pid $$"
     if [ "$3" = 1 ]; then "$2" index || echo "index had failures (see above); fetching anyway"; fi
     "$2" fetch
-    echo "=== harvest end $(date -u +%FT%TZ) exit $?"
+    rc=$?
+    echo "=== harvest end $(date -u +%FT%TZ) fetch exit $rc"
   } >> "$1/harvest.log" 2>&1 < /dev/null
   rm -f "$1/harvest.pid"
 ' _ "$root" "$PWD/$bin" "$index"

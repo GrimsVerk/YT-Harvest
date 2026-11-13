@@ -5,7 +5,8 @@
 shorts_max_seconds = 180
 
 # Seconds between per-video requests. Polite pacing; do not lower casually.
-fetch_delay_seconds = 6.0
+# 6 s right after a full 12-channel index hit HTTP 429 after 8 videos (2026-11-13).
+fetch_delay_seconds = 15.0
 
 # Halt triggers. Videos that are unavailable or have no captions never extend
 # the error streak; a bot check halts at once and leaves STOPPED-bot-check.txt.
