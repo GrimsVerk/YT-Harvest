@@ -16,8 +16,12 @@ Settled decisions and why, newest first. Don't relitigate; update an entry if th
 - 2026-11-13: No date cut-off by default (`start_date` unset): the brief asks for all videos.
 - 2026-11-13: Fetch order: each channel's 10 most-viewed and 10 most-recent first (round-robin
   across channels), then everything else newest first. Why: idea mining starts with exactly those.
-- 2026-11-13: Pacing 6 s between videos, one fetcher at a time (lock file). Why: polite; a full
-  run of ~11k videos takes about a day, which is fine in the background.
+- 2026-11-13: Pacing 15 s between videos, one fetcher at a time (lock file). Why: the first
+  run at 6 s, started straight after indexing all 12 channels (thousands of listing pages), got
+  HTTP 429 after 8 videos. At 15 s the ~10.4k pending videos take ~2 days in the background.
+  Index and fetch should not run back to back; `scripts/harvest-bg.sh --no-index` fetches only.
+- 2026-11-13: HTTP 429 counts as a bot check (halt + stop file). Why: it is YouTube telling an
+  automated client to back off; the owner's rule is to stop, not to push through.
 - 2026-11-13: A bot check ("sign in to confirm you're not a bot", HTTP 429) halts the fetch and
   leaves `STOPPED-bot-check.txt`; fetch refuses until a human deletes it. Age-gated videos also
   say "sign in to confirm (your age)" and are classed `unavailable` instead. Why: owner rule, no
