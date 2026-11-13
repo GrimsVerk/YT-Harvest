@@ -1,0 +1,84 @@
+# Committed levers and the channel list. Machine-specific values (data_root)
+# go in local.toml (copy local.toml.example). Missing keys take in-code defaults.
+
+# At or below this many seconds a video is a Short and is not fetched.
+shorts_max_seconds = 180
+
+# Seconds between per-video requests. Polite pacing; do not lower casually.
+# 6 s right after a full 12-channel index hit HTTP 429 after 8 videos (2026-11-13).
+fetch_delay_seconds = 15.0
+
+# Halt triggers. Videos that are unavailable or have no captions never extend
+# the error streak; a bot check halts at once and leaves STOPPED-bot-check.txt.
+consecutive_fetch_error_limit = 3
+fetch_error_rate_limit = 0.03
+missing_caption_rate_limit = 1.0
+
+# Fetch priority and `picks`: per channel, this many most-viewed and most-recent.
+pick_top = 10
+pick_recent = 10
+
+# Topic selection (`yt-harvest select`): keyword in title or description, or at
+# least `mention_threshold` distinct keywords in the transcript.
+mention_threshold = 3
+topic_keywords = [
+  "moving average", "rsi", "macd", "momentum", "mean reversion", "breakout",
+  "support", "resistance", "trend", "volume", "volatility", "vix",
+  "yield curve", "interest rates", "fed", "inflation", "cpi", "liquidity",
+  "dollar", "dxy", "bitcoin", "halving", "altcoin", "dividend", "etf",
+  "earnings", "recession", "stop loss", "position size", "backtest",
+  "risk management", "options", "short selling", "sector rotation",
+]
+
+# The 12 owner-confirmed channels (2026-11-13). How the missing handles were
+# found: see docs/DECISIONS.md.
+[[channels]]
+name = "Andrei Jikh"
+url = "https://www.youtube.com/@AndreiJikh"
+
+[[channels]]
+name = "Bravos Research"
+url = "https://www.youtube.com/@bravosresearch"
+
+[[channels]]
+name = "Real Vision"
+url = "https://www.youtube.com/channel/UCGXWKlq1Oxr3ddEtmKhAkPg"
+
+[[channels]]
+name = "Raoul Pal The Journey Man"
+url = "https://www.youtube.com/channel/UCVFSzL3VuZKP3cN9IXdLOtw"
+
+[[channels]]
+name = "EC Krown"
+url = "https://www.youtube.com/@ECKrown"
+
+# EC Krown's second channel: `@ECKrown4` returns 404 and a channel search found
+# no other Krown channel of his. Add it here once the owner has the right URL.
+
+[[channels]]
+name = "EllioTrades"
+url = "https://www.youtube.com/@elliotrades_official"
+
+[[channels]]
+name = "George Gammon"
+url = "https://www.youtube.com/@GeorgeGammon"
+
+[[channels]]
+name = "Mark Tilbury"
+url = "https://www.youtube.com/@marktilbury"
+
+[[channels]]
+name = "MoneyZG"
+url = "https://www.youtube.com/@MoneyZG"
+
+[[channels]]
+name = "New Money"
+url = "https://www.youtube.com/@NewMoneyYouTube"
+
+[[channels]]
+name = "How Money Works"
+url = "https://www.youtube.com/@HowMoneyWorks"
+
+[[channels]]
+name = "Miles Deutscher Finance"
+url = "https://www.youtube.com/@milesdeutscher1357"

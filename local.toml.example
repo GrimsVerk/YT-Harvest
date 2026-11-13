@@ -1,0 +1,6 @@
+# Machine-specific settings. Copy to `local.toml` (gitignored) and edit.
+# Keys here override config.toml.
+
+# Where the index, transcripts, failure ledger, fetch log and PID file live.
+# Transcripts are copyrighted: keep this outside the repo.
+data_root = "~/data/yt-harvest"
