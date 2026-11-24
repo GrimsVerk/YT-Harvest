@@ -1,0 +1,7 @@
+{"wireMagic": "pb3", "events": [
+  {"tStartMs": 0, "dDurationMs": 2000, "segs": [{"utf8": "Rates"}, {"utf8": " went"}, {"utf8": " up"}]},
+  {"tStartMs": 2000, "aAppend": 1, "segs": [{"utf8": "\n"}]},
+  {"tStartMs": 2500, "segs": [{"utf8": "and"}, {"utf8": " stocks fell"}]},
+  {"tStartMs": 61000, "segs": [{"utf8": "a minute later"}]},
+  {"tStartMs": 62000}
+]}
