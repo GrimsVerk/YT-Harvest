@@ -1,6 +1,10 @@
 # Machine-specific settings. Copy to `local.toml` (gitignored) and edit.
-# Keys here override config.toml.
+# Keys here override config.toml and the channels file.
 
 # Where the index, transcripts, failure ledger, fetch log and PID file live.
 # Transcripts are copyrighted: keep this outside the repo.
 data_root = "~/data/yt-harvest"
+
+# Your channels file (template: channels.example.toml). A relative path is
+# relative to this file. `--channels FILE` on the command line overrides it.
+# channels_file = "/path/to/your-channels.toml"

@@ -9,6 +9,8 @@ dist/
 
 # Machine-specific settings (copy local.toml.example)
 local.toml
+# Channel lists belong to the user, not this repo (template: channels.example.toml)
+channels.toml
 # Never commit harvested data
 data/
 *.jsonl

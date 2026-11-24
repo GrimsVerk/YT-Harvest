@@ -1,12 +1,21 @@
 """Every lever, declared once.
 
-Two files feed it. `config.toml` (committed) holds the channel list and the
-levers. `local.toml` (gitignored; copy `local.toml.example`) holds what is
-machine-specific: today only `data_root`, where the index, transcripts, ledger,
-log and PID file live. Transcripts are copyrighted and never enter git, which is
-why the data root defaults to a folder outside the repo.
+Three files feed it, later ones overriding earlier ones key by key:
 
-A missing key falls back to its default; a missing file reads as empty.
+1. `config.toml` (committed): the tool's levers (pacing, halts, picks). No channels.
+2. The channels file (supplied by whoever uses the tool, never committed here):
+   the `[[channels]]` list and anything specific to that use, typically
+   `topic_keywords`. Given by `--channels FILE` on the command line, or by
+   `channels_file` in `local.toml` (relative paths are relative to `local.toml`).
+   Template: `channels.example.toml`.
+3. `local.toml` (gitignored; copy `local.toml.example`): what is machine-specific,
+   `data_root` (where the index, transcripts, ledger, log and PID file live) and
+   `channels_file`. Transcripts are copyrighted and never enter git, which is why
+   the data root defaults to a folder outside the repo.
+
+A missing key falls back to its default; a missing `config.toml` or `local.toml`
+reads as empty. A named channels file that does not exist is an error, and so is
+a `channels` list in `config.toml` or `local.toml`.
 """
 
 from __future__ import annotations
@@ -19,6 +28,14 @@ from pathlib import Path
 from typing import Any
 
 DEFAULT_DATA_ROOT = "~/data/yt-harvest"
+NO_CHANNELS = (
+    "no channel list given: pass `--channels FILE` or set `channels_file` in local.toml "
+    "(templates: channels.example.toml, local.toml.example)"
+)
+
+
+class ConfigError(ValueError):
+    """A config problem the user must fix; the CLI prints it without a traceback."""
 
 
 @dataclass(frozen=True)
@@ -34,6 +51,8 @@ class Channel:
 class Config:
     data_root: Path
     channels: tuple[Channel, ...] = ()
+    # The channels file the list came from (None = no list given).
+    channels_file: Path | None = None
     # At or below this many seconds a video is a Short and is not fetched.
     shorts_max_seconds: int = 180
     # Optional: videos before this date are recorded as out of range. None = all.
@@ -64,24 +83,50 @@ def slugify(name: str) -> str:
     return re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")
 
 
-def load_config(path: Path, local_path: Path | None = None) -> Config:
-    """Read `config.toml` and, if present, the local override file.
+def load_config(
+    path: Path, local_path: Path | None = None, channels_path: Path | None = None
+) -> Config:
+    """Read `config.toml`, the channels file and the local override file.
 
-    `local_path` defaults to `local.toml` next to `path`. Keys in the local file
-    override the committed ones.
+    `local_path` defaults to `local.toml` next to `path`. `channels_path` (from
+    `--channels`) wins over `channels_file` in the local file.
     """
     raw = _read_toml(path)
-    local = _read_toml(local_path if local_path is not None else path.parent / "local.toml")
-    merged = {**raw, **local}
-    channels = tuple(_channel(entry) for entry in merged.get("channels", []))
+    local_file = local_path if local_path is not None else path.parent / "local.toml"
+    local = _read_toml(local_file)
+    for source, table in ((path, raw), (local_file, local)):
+        if "channels" in table:
+            raise ConfigError(
+                f"{source}: move the [[channels]] list into its own channels file "
+                "(see channels.example.toml) and point to it with --channels or channels_file"
+            )
+    if "channels_file" in raw:
+        raise ConfigError(f"{path}: `channels_file` is machine-specific; set it in local.toml")
+    list_file: Path | None = None
+    if channels_path is not None:
+        list_file = channels_path.expanduser()
+    elif local.get("channels_file"):
+        list_file = Path(str(local["channels_file"])).expanduser()
+        if not list_file.is_absolute():
+            list_file = local_file.parent / list_file
+    listed: dict[str, Any] = {}
+    if list_file is not None:
+        if not list_file.is_file():
+            raise ConfigError(f"channels file not found: {list_file}")
+        listed = _read_toml(list_file)
+        if "channels_file" in listed:
+            raise ConfigError(f"{list_file}: `channels_file` belongs in local.toml")
+    merged = {**raw, **listed, **local}
+    channels = tuple(_channel(entry) for entry in listed.get("channels", []))
     slugs = [channel.slug for channel in channels]
     duplicates = sorted({slug for slug in slugs if slugs.count(slug) > 1})
     if duplicates:
-        raise ValueError(f"duplicate channel slugs in config: {', '.join(duplicates)}")
+        raise ConfigError(f"duplicate channel slugs in config: {', '.join(duplicates)}")
     start = merged.get("start_date")
     return Config(
         data_root=Path(str(merged.get("data_root", DEFAULT_DATA_ROOT))).expanduser(),
         channels=channels,
+        channels_file=list_file,
         shorts_max_seconds=int(merged.get("shorts_max_seconds", 180)),
         start_date=None if start in (None, "") else _as_date(start),
         fetch_delay_seconds=float(merged.get("fetch_delay_seconds", 6.0)),
@@ -95,6 +140,14 @@ def load_config(path: Path, local_path: Path | None = None) -> Config:
     )
 
 
+def require_channels(config: Config) -> None:
+    """Raise `ConfigError` unless a channels file with at least one channel was given."""
+    if config.channels_file is None:
+        raise ConfigError(NO_CHANNELS)
+    if not config.channels:
+        raise ConfigError(f"{config.channels_file}: no [[channels]] entries")
+
+
 def _read_toml(path: Path) -> dict[str, Any]:
     if not path.exists():
         return {}
@@ -104,7 +157,7 @@ def _read_toml(path: Path) -> dict[str, Any]:
 
 def _channel(entry: Any) -> Channel:
     if not isinstance(entry, dict) or "url" not in entry or "name" not in entry:
-        raise ValueError(f"each [[channels]] entry needs `name` and `url`: {entry!r}")
+        raise ConfigError(f"each [[channels]] entry needs `name` and `url`: {entry!r}")
     name = str(entry["name"])
     return Channel(slug=str(entry.get("slug") or slugify(name)), name=name, url=str(entry["url"]))
 

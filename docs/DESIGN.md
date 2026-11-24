@@ -4,27 +4,35 @@ What we are building. Drafted from the 2026-11-13 brief; keep it current.
 
 ## Summary
 
-A small CLI (`yt-harvest`) that lists the uploads of the channels in `config.toml`, fetches their
-existing English captions through `yt-dlp` into a local cache, and helps pick what to read
-(per-channel most-viewed and most-recent; topic keywords). Agents then read the cached
-transcripts and write ideas, in their own words, into `docs/ideas/`.
+A small CLI (`yt-harvest`) that lists the uploads of the channels in the user's channels file,
+fetches their existing English captions through `yt-dlp` into a local cache, and helps pick what
+to read (per-channel most-viewed and most-recent; topic keywords). Agents then read the cached
+transcripts and write ideas, in their own words, in the project that asked for them
+(template brief: `docs/reader-brief.md`).
 
 Ported from the general half of the archived `find_best_mobo` repo (index, transcripts, ledger,
 selection, config, CLI); everything motherboard-specific and every model call was left out.
 
 ## Users and core flows
 
-The owner and their agents.
+Any project and its agents. Each brings its own channels file; this repo holds none.
 
+0. Write a channels file (copy `channels.example.toml`, keep it outside this repo) and pass it
+   with `--channels FILE`, or set `channels_file` in `local.toml`. Without one, every command but
+   `text` and `where` stops with a clear message.
 1. `yt-harvest index`: list every configured channel into `<data_root>/index/<slug>.jsonl`.
 2. `yt-harvest fetch` (or `scripts/harvest-bg.sh` detached): cache transcripts, picks first,
    then newest first; resumable; halts on a bot check.
-3. `yt-harvest status`, `picks`, `select`, `text VIDEO_ID`: see progress, choose, read.
+3. `yt-harvest channels`, `status`, `picks`, `select`, `text VIDEO_ID`: check the list, see
+   progress, choose, read.
 
 ## Approach
 
-- `config.py`: `config.toml` (committed: channels, levers) + `local.toml` (gitignored:
-  `data_root`, default `~/data/yt-harvest`; template `local.toml.example`).
+- `config.py`: `config.toml` (committed: the tool's levers, no channels), then the channels
+  file (the user's: `[[channels]]`, `topic_keywords`, any lever override; template
+  `channels.example.toml`), then `local.toml` (gitignored: `data_root`, default
+  `~/data/yt-harvest`, and `channels_file`; template `local.toml.example`). A `channels` list in
+  `config.toml` or `local.toml` is an error.
 - `ytdlp.py`: the only module that touches `yt-dlp` (library, one reused client). Tests fake its
   two functions.
 - `index.py`: one record per listed video: `pending`, `excluded_short` (≤ 180 s),
@@ -42,9 +50,4 @@ The owner and their agents.
 
 ## Milestones
 
-1. Port + fetch the 12 channels (this branch, `harvest-1`).
-2. Ideas for GrimsTrade: `docs/ideas/grimstrade-ideas.md`.
-
-## Open questions
-
-- One channel from the brief does not resolve (404); need the right URL from the owner.
+1. Port the harvester; take the channel list from the user's file (this branch, `harvest-1`).

@@ -1,11 +1,14 @@
-# Committed levers and the channel list. Machine-specific values (data_root)
-# go in local.toml (copy local.toml.example). Missing keys take in-code defaults.
+# The tool's committed levers. No channels here: the channel list (and anything
+# specific to one use, such as topic_keywords) lives in your own channels file,
+# given with `--channels FILE` or `channels_file` in local.toml; template:
+# channels.example.toml. Machine-specific values (data_root, channels_file) go
+# in local.toml (copy local.toml.example). Missing keys take in-code defaults.
 
 # At or below this many seconds a video is a Short and is not fetched.
 shorts_max_seconds = 180
 
 # Seconds between per-video requests. Polite pacing; do not lower casually.
-# 6 s right after a full 12-channel index hit HTTP 429 after 8 videos (2026-11-13).
+# 6 s right after a full index of a dozen channels hit HTTP 429 after 8 videos (2026-11-13).
 fetch_delay_seconds = 15.0
 
 # Halt triggers. Videos that are unavailable or have no captions never extend
@@ -19,22 +22,6 @@ pick_top = 10
 pick_recent = 10
 
 # Topic selection (`yt-harvest select`): keyword in title or description, or at
-# least `mention_threshold` distinct keywords in the transcript.
+# least `mention_threshold` distinct keywords in the transcript. Set
+# `topic_keywords` in your channels file; with none, nothing matches by topic.
 mention_threshold = 3
-topic_keywords = [
-  "moving average", "rsi", "macd", "momentum", "mean reversion", "breakout",
-  "support", "resistance", "trend", "volume", "volatility", "vix",
-  "yield curve", "interest rates", "fed", "inflation", "cpi", "liquidity",
-  "dollar", "dxy", "bitcoin", "halving", "altcoin", "dividend", "etf",
-  "earnings", "recession", "stop loss", "position size", "backtest",
-  "risk management", "options", "short selling", "sector rotation",
-]
-
-# Example channels (placeholders): replace with your own list.
-[[channels]]
-name = "Example Channel One"
-url = "https://www.youtube.com/@example-channel-one"
-
-[[channels]]
-name = "Example Channel Two"
-url = "https://www.youtube.com/@example-channel-two"

@@ -1,6 +1,10 @@
-"""Command-line entry point: `yt-harvest <command>`.
+"""Command-line entry point: `yt-harvest [--channels FILE] <command>`.
+
+The channel list comes from the user's own channels file: `--channels FILE`, or
+`channels_file` in local.toml. Every command except `text` and `where` needs it.
 
 Commands:
+  channels                     list the configured channels (slug, name, URL)
   index [--channel SLUG ...]   list each channel's uploads into the index
   fetch [--limit N]            cache transcripts: picks first, then newest first
   status                       per-channel counts: indexed, pending, cached, failed
@@ -22,7 +26,7 @@ from contextlib import contextmanager
 from datetime import UTC, datetime
 from pathlib import Path
 
-from yt_harvest.config import Config, load_config
+from yt_harvest.config import Config, ConfigError, load_config, require_channels
 from yt_harvest.index import (
     PENDING,
     Video,
@@ -36,13 +40,22 @@ from yt_harvest.select import fetch_order, picks, select_all, write_selected
 from yt_harvest.transcripts import cache_path, fetch_all, load_cached, render_text
 
 STOP_FILE = "STOPPED-bot-check.txt"
+# Commands that work without a channel list.
+NO_LIST_NEEDED = {"text", "where"}
 
 
 def main(argv: Sequence[str] | None = None) -> int:
     args = _parser().parse_args(argv)
-    config = load_config(args.config)
     command: str = args.command
+    try:
+        config = load_config(args.config, channels_path=args.channels)
+        if command not in NO_LIST_NEEDED:
+            require_channels(config)
+    except ConfigError as error:
+        print(f"yt-harvest: {error}", file=sys.stderr)
+        return 2
     handler = {
+        "channels": _channels,
         "index": _index,
         "fetch": _fetch,
         "status": _status,
@@ -57,7 +70,15 @@ def main(argv: Sequence[str] | None = None) -> int:
 def _parser() -> ArgumentParser:
     parser = ArgumentParser(prog="yt-harvest", description="Harvest YouTube transcripts.")
     parser.add_argument("--config", type=Path, default=Path("config.toml"))
+    parser.add_argument(
+        "--channels",
+        type=Path,
+        default=None,
+        metavar="FILE",
+        help="your channels file (overrides channels_file in local.toml)",
+    )
     sub = parser.add_subparsers(dest="command", required=True)
+    sub.add_parser("channels", help="list the configured channels")
     index = sub.add_parser("index", help="list each channel's uploads into the index")
     index.add_argument("--channel", action="append", default=[], help="only this slug")
     fetch = sub.add_parser("fetch", help="cache transcripts (picks first, then newest)")
@@ -70,6 +91,13 @@ def _parser() -> ArgumentParser:
     text.add_argument("video_id")
     sub.add_parser("where", help="print the data root")
     return parser
+
+
+def _channels(config: Config, args: Namespace) -> int:
+    print(f"channels file: {config.channels_file}")
+    for channel in config.channels:
+        print(f"{channel.slug}\t{channel.name}\t{channel.url}")
+    return 0
 
 
 def _index(config: Config, args: Namespace) -> int:

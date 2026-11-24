@@ -1,0 +1,23 @@
+# Example channels file. Copy it somewhere of your own (outside this repo is best,
+# e.g. next to the project that uses the harvest), list your channels, then either
+#   uv run yt-harvest --channels /path/to/your-channels.toml index
+# or set `channels_file = "/path/to/your-channels.toml"` in local.toml.
+#
+# Any lever from config.toml may also be set here (it overrides config.toml;
+# local.toml overrides both). The channels below are placeholders.
+
+# Topic selection (`yt-harvest select`): words or phrases, matched
+# case-insensitively on whole words in titles, descriptions and transcripts.
+topic_keywords = ["example topic", "another phrase"]
+mention_threshold = 3
+
+# One entry per channel: a display name and the channel URL (handle or id form).
+# `slug` is optional (default: the name, lower-case, dashes); it names the index file.
+[[channels]]
+name = "Example Channel One"
+url = "https://www.youtube.com/@example-channel-one"
+
+[[channels]]
+name = "Example Channel Two"
+url = "https://www.youtube.com/channel/UCxxxxxxxxxxxxxxxxxxxxxx"
+slug = "example-two"
